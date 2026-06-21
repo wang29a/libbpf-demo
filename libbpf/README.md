@@ -17,8 +17,8 @@ sudo apt install -y clang libbpf-dev libelf-dev
 ### bpftool
 
 ```bash
-git clone https://github.com/libbpf/libbpf-bootstrap.git ~/eBPF/libbpf-bootstrap
-cd ~/eBPF/libbpf-bootstrap && git submodule update --init --recursive
+git clone https://github.com/libbpf/libbpf-bootstrap.git
+cd libbpf-bootstrap && git submodule update --init --recursive
 cd examples/c && make
 ```
 
