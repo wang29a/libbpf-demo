@@ -109,9 +109,15 @@ static void print_histogram(void)
     printf("  %-12s %8s  %s\n", "range", "count", "");
     printf("  %-12s %8s  %s\n", "-----------", "--------", "---------------------");
 
-    /* scale bar to max 40 chars */
-    for (int i = 0; i <= max_idx; i++) {
-        if (buckets[i] == 0 && i > max_idx - 10 && buckets[i-1] == 0) continue;
+    /* skip leading empty buckets, but show at most one empty for context */
+    int first = 0;
+    while (first <= max_idx && buckets[first] == 0) first++;
+    if (first > 0) first--;
+
+    static const char bar[] = "########################################";
+    for (int i = first; i <= max_idx; i++) {
+        /* skip trailing empty buckets (collapse long empty runs) */
+        if (buckets[i] == 0 && i > max_idx - 3) continue;
         int bar_len = max_bucket ? (int)(40 * buckets[i] / max_bucket) : 0;
         if (bar_len == 0 && buckets[i] > 0) bar_len = 1;
 
@@ -124,9 +130,9 @@ static void print_histogram(void)
             snprintf(range, sizeof(range), "[%llu, %llu)",
                      (unsigned long long)lo, (unsigned long long)hi);
         }
-        printf("  %-12s %8llu  %s\n", range,
+        printf("  %-12s %8llu  %.*s\n", range,
                (unsigned long long)buckets[i],
-               "████████████████████████████████████████" + (40 - bar_len));
+               bar_len, bar);
     }
 }
 
@@ -183,10 +189,11 @@ static void print_pid_breakdown(void)
     printf("  %8s  %10s  %s\n", "PID", "CALLS", "");
     int show = n_pids < 12 ? n_pids : 12;
     for (int i = 0; i < show; i++) {
-        int bar = (int)(20 * pid_stats[i].cnt / pid_stats[0].cnt);
-        printf("  %8u  %10llu  %s\n", pid_stats[i].pid,
+        int bar_len = (int)(20 * pid_stats[i].cnt / pid_stats[0].cnt);
+        static const char pbar[] = "####################";
+        printf("  %8u  %10llu  %.*s\n", pid_stats[i].pid,
                (unsigned long long)pid_stats[i].cnt,
-               "████████████████████" + (20 - bar));
+               bar_len, pbar);
     }
 }
 
